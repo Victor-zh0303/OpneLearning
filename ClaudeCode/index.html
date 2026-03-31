@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClaudeCode 学习笔记</title>
+<style>
+  /* 全局重置与基础样式 */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  :root {
+    /* 炫酷渐变主色调 - 蓝紫科技风 */
+    --primary-100: #e0e7ff;
+    --primary-500: #6366f1;
+    --primary-600: #4f46e5;
+    --primary-700: #4338ca;
+    /* 辅助色 */
+    --accent-pink: #ec4899;
+    --accent-cyan: #06b6d4;
+    /* 中性色 */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+    /* 样式变量 */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+    --shadow-hover: 0 10px 15px -3px rgba(99, 102, 241, 0.15);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--accent-cyan) 100%);
+    --gradient-hover: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-pink) 100%);
+    /* 侧边栏宽度变量 */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 60px;
+  }
+
+  body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--gray-50);
+    color: var(--gray-900);
+    background-image: radial-gradient(var(--primary-100) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* 侧边栏样式 - 可收起/展开 */
+  .sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-collapsed-width);
+    background-color: white;
+    border-right: 1px solid var(--gray-200);
+    padding: 1.5rem 0;
+    overflow-y: auto;
+    transition: var(--transition);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+
+  /* 侧边栏收起状态 */
+  .sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+
+  .sidebar-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+    transition: var(--transition);
+    color: var(--primary-500);
+  }
+
+  .sidebar-toggle:hover {
+    background-color: var(--primary-100);
+    transform: scale(1.05);
+  }
+
+  .sidebar-header {
+    padding: 0 1.5rem 1.25rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    transition: var(--transition);
+  }
+
+  .collapsed .sidebar-header {
+    padding: 0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .sidebar-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    width: 40px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 3px;
+    transition: var(--transition);
+  }
+
+  .collapsed .sidebar-header::after {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+  }
+
+  .sidebar-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    letter-spacing: -0.01em;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: var(--transition);
+  }
+
+  .collapsed .sidebar-title {
+    font-size: 0;
+  }
+
+  .menu-list {
+    list-style: none;
+  }
+
+  .menu-item {
+    padding: 0.75rem 1.5rem;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .collapsed .menu-item {
+    padding: 0.75rem 0;
+    justify-content: center;
+  }
+
+  .menu-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--gradient-primary);
+    transform: translateY(100%);
+    transition: var(--transition);
+  }
+
+  .collapsed .menu-item::before {
+    display: none;
+  }
+
+  .menu-item:hover {
+    background-color: var(--gray-50);
+    color: var(--primary-600);
+    transform: translateX(2px);
+  }
+
+  .collapsed .menu-item:hover {
+    transform: none;
+    background-color: var(--primary-100);
+  }
+
+  .menu-item.active {
+    color: var(--primary-600);
+    font-weight: 500;
+    background-color: var(--primary-100);
+  }
+
+  .menu-item.active::before {
+    transform: translateY(0);
+  }
+
+  .menu-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .menu-text {
+    transition: var(--transition);
+  }
+
+  .collapsed .menu-text {
+    font-size: 0;
+  }
+
+  /* 内容区域样式 */
+  .content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    transition: var(--transition);
+  }
+
+  /* 内容区域 - 侧边栏收起时扩大padding */
+  .sidebar.collapsed ~ .content {
+    padding-left: 2rem;
+  }
+
+  .content-container {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .content-container:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .iframe-box {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* 错误提示样式 */
+  .error-container {
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--gray-700);
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--primary-100) 100%);
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+  }
+
+  .error-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-900);
+  }
+
+  .error-subtext {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+  }
+
+  /* 响应式适配 - 移动端优化 */
+  @media (max-width: 768px) {
+    body {
+      flex-direction: column;
+      background-size: 15px 15px;
+    }
+
+    .sidebar {
+      width: 100%;
+      min-width: 100%;
+      height: auto;
+      max-height: 240px;
+      border-right: none;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 1rem 0;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .sidebar.collapsed {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    .sidebar-toggle {
+      display: none; /* 移动端隐藏收起按钮 */
+    }
+
+    .sidebar-header {
+      padding: 0 1rem 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .collapsed .sidebar-header {
+      padding: 0 1rem 0.75rem;
+      text-align: left;
+    }
+
+    .collapsed .sidebar-header::after {
+      left: 1rem;
+      transform: none;
+      width: 40px;
+    }
+
+    .collapsed .sidebar-title {
+      font-size: 1.125rem;
+    }
+
+    .menu-item {
+      padding: 0.625rem 1rem;
+    }
+
+    .collapsed .menu-item {
+      padding: 0.625rem 1rem;
+      justify-content: flex-start;
+    }
+
+    .collapsed .menu-text {
+      font-size: 0.9375rem;
+    }
+
+    .content {
+      padding: 1rem;
+      height: calc(100vh - 240px);
+    }
+
+    .sidebar.collapsed ~ .content {
+      padding-left: 1rem;
+    }
+  }
+
+  /* 滚动条美化 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-100);
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--primary-500) 0%, var(--accent-cyan) 100%);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary-600) 0%, var(--accent-pink) 100%);
+  }
+</style>
+<!-- 引入极简图标库 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+<!-- 侧边栏 -->
+<div class="sidebar" id="sidebar">
+  <!-- 收起/展开按钮 -->
+  <div class="sidebar-toggle" id="sidebarToggle">
+    <i class="bi bi-chevron-left"></i>
+  </div>
+  
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">LangChain 学习笔记</h2>
+  </div>
+  
+  <ul class="menu-list">
+    <li class="menu-item active" data-src="HelloWorld.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">HelloWorld.html</span>
+    </li>
+    <li class="menu-item" data-src="1.Model.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">1.Model.html</span>
+    </li>
+    <li class="menu-item" data-src="2.LangChain之Chains的使用.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">2.LangChain之Chains的使用.html</span>
+    </li>
+    <li class="menu-item" data-src="3.Langchain使用之Memory.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">3.Langchain使用之Memory.html</span>
+    </li>
+    <li class="menu-item" data-src="4.LangChain使用之Tools.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">4.LangChain使用之Tools.html</span>
+    </li>
+    <li class="menu-item" data-src="5.Langchain使用之Agents.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">5.Langchain使用之Agents.html</span>
+    </li>
+    <li class="menu-item" data-src="6.Retrieval模块.html">
+      <i class="bi bi-file-code menu-icon"></i>
+      <span class="menu-text">6.Retrieval模块.html</span>
+    </li>
+  </ul>
+</div>
+
+<!-- 内容区域 -->
+<div class="content">
+  <div class="content-container">
+    <!-- 错误提示容器 -->
+    <div class="error-container" id="error-container">
+      <div class="error-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="error-text">文件加载失败</div>
+      <div class="error-subtext">请检查文件名是否正确或文件是否存在</div>
+    </div>
+    <!-- 内容iframe -->
+    <iframe id="main-iframe" class="iframe-box" src="HelloWorld.html"></iframe>
+  </div>
+</div>
+
+<script>
+  // 获取DOM元素
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const menuItems = document.querySelectorAll('.menu-item');
+  const iframe = document.getElementById('main-iframe');
+  const errorContainer = document.getElementById('error-container');
+  const toggleIcon = sidebarToggle.querySelector('i');
+
+  // 侧边栏收起/展开切换
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    
+    // 切换图标
+    if (sidebar.classList.contains('collapsed')) {
+      toggleIcon.classList.remove('bi-chevron-left');
+      toggleIcon.classList.add('bi-chevron-right');
+    } else {
+      toggleIcon.classList.remove('bi-chevron-right');
+      toggleIcon.classList.add('bi-chevron-left');
+    }
+  });
+
+  // 监听iframe加载状态
+  iframe.addEventListener('error', () => {
+    iframe.style.display = 'none';
+    errorContainer.style.display = 'flex';
+  });
+
+  iframe.addEventListener('load', () => {
+    errorContainer.style.display = 'none';
+    iframe.style.display = 'block';
+  });
+
+  // 菜单点击事件
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      // 移除所有激活状态
+      menuItems.forEach(i => i.classList.remove('active'));
+      // 添加当前激活状态
+      item.classList.add('active');
+      // 加载对应页面
+      const src = item.dataset.src;
+      iframe.src = src;
+      // 移动端优化：点击后滚动到内容区
+      if (window.innerWidth <= 768) {
+        document.querySelector('.content').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // 页面加载完成后初始化
+  window.addEventListener('DOMContentLoaded', () => {
+    // 确保初始状态正确
+    iframe.src = menuItems[0].dataset.src;
+  });
+</script>
+</body>
+</html>
